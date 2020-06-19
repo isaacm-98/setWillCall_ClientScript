@@ -1,24 +1,40 @@
 /**
- *
+ * 
  * @NApiVersion 2.x
  * @NScriptType ClientScript
  */
 
- define(['N/record'], 
+ define(['N/record'],
     function (record) {
 
-        function getWillCallAddress(customerId) {
+        function getWillCallAddressId(customerId) {
+            var willCallAddressId;
             var customerRecord = record.load({
                 type: 'customer',
                 id: customerId
             });
 
-            customerRecord.findSublistLineWithValue({
+            var addressSublistLine = customerRecord.findSublistLineWithValue({
                 sublistId: 'addressbook',
                 fieldId: 'addr1',
                 value: '2380 Railroad St.'
             });
 
+            if (addressSublistLine == -1) {
+                willCallAddressId = record.create({
+                   type: 'address',
+                   defaultValues: {
+                       entity: customerId,
+                       addr1: '2380 Railroad St.',
+                       addr2: 'BLDG 101',
+                       city: 'Corona',
+                       state: 'California',
+                       zip :'92880'
+                   }
+                }).save();
+            }
+
+            return willCallAddressId;
             
 
         }
@@ -30,11 +46,11 @@
 
         if (fieldId != 'shipmethod' || currentRecord.getValue(fieldId) != 6) { return; }
 
-        var willCallId = getWillCallAddress(customerId);
+        var willCallAddressId = getWillCallAddressid(customerId);
 
         currentRecord.setValue({
             fieldId: 'shipaddresslist',
-            value: willCallId
+            value: willCallAddressId
         });
     }
 
